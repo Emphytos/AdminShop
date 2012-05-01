@@ -13,8 +13,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.w3c.dom.Document;
@@ -26,47 +31,63 @@ import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class AdminShop extends JavaPlugin {
-	
+
 	public String prefix = "[AdminShop] ";
 	public Logger logger = Logger.getLogger("Minecraft");
-	
+
 	public static ArrayList<Shop> listshop = new ArrayList<Shop>();
 	public static ArrayList<String> confirm = new ArrayList<String>();
-	
+
 	public AdminShopBlockListener blockListener = new AdminShopBlockListener(this);
 	public AdminShopPlayerListener PlayerListener = new AdminShopPlayerListener(this);
-	
+
 	public PermissionManager Permissions = null;
 	public boolean hooked = false;
-	
+
+	public FileConfiguration config;
+
 	public void onDisable()
 	{
 		logger.info(prefix + "AdminShop is now disabled !");
 		saveShop();
 	}
-	
+
 	public void onEnable()
 	{
 		PluginManager pm = getServer().getPluginManager();
-		
+
 		if(pm.isPluginEnabled("PermissionsEx") && (!this.hooked))
 		{
 			this.Permissions = PermissionsEx.getPermissionManager();
 			pm.registerEvents(PlayerListener, this);
 			pm.registerEvents(blockListener, this);
 			loadShop();
+			setupConfig();
 			logger.info(prefix + "AdminShop is now enabled !");
-			
+
 			this.hooked = true;
 		}
-		
+
 		else
 		{
 			logger.warning(prefix + "PermissionsEx n'est pas installe, desactivation du plugin...");
 			pm.disablePlugin(this);
 		}
 	}
-	
+
+	public void setupConfig()
+	{
+		File config = new File(getDataFolder(), "config.yml");
+		if (!config.exists()) {
+			getConfig().options().header("AdminShop Config");
+			getConfig().addDefault("Monnaie", "$");
+			getConfig().addDefault("Compte-Etat", "Etat");
+			getConfig().addDefault("Retrait-Etat", false);
+			getConfig().options().copyDefaults(true);
+			saveConfig();
+		}
+	}
+
 	public void saveShop()
 	{
 		if(AdminShop.listshop.size() != 0)
@@ -159,7 +180,7 @@ public class AdminShop extends JavaPlugin {
 			}
 		}
 	}
-	
+
 	public void loadShop()
 	{
 		try {
@@ -203,11 +224,48 @@ public class AdminShop extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
 		Node nValue = (Node) nlList.item(0);
 		return nValue.getNodeValue();
+	}
+
+
+	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)
+	{
+		Player p = (Player)sender;
+
+		if(this.Permissions.has(p, "shop.admin"))
+		{
+			if(commandLabel.equalsIgnoreCase("adminshop"))
+			{
+				if(args.length == 0)
+				{
+					return false;
+				}
+
+				if(args.length == 1)
+				{
+					String cmd = args[0];
+
+					if(cmd.equalsIgnoreCase("reload"))
+					{
+						PluginManager pm = getServer().getPluginManager();
+						
+						this.saveShop();
+						this.loadShop();
+						this.saveConfig();
+						
+						p.sendMessage(ChatColor.GREEN + "AdminShop Reload.");
+					}
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

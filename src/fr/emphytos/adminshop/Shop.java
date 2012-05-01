@@ -4,11 +4,19 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class Shop 
 {
+	public AdminShop plugin;
+	
+	public Shop(AdminShop plugin)
+	{
+		this.plugin = plugin;
+	}
+	
 	private Location loc;
 	private String owner;
 	private Material bloc;
@@ -128,7 +136,7 @@ public class Shop
 		{
 			sign.setLine(2, ChatColor.AQUA + "Aucun bloc");
 		}
-		sign.setLine(3, ChatColor.GREEN + "" + shop.getPrix() + ChatColor.AQUA + " Imps/lot");
+		//sign.setLine(3, ChatColor.GREEN + "" + shop.getPrix() + ChatColor.AQUA + " " + monnaie + " /lot");
 		sign.update();
 	}
 	

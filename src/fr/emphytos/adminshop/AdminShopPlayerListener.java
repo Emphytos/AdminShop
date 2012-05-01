@@ -25,6 +25,7 @@ public class AdminShopPlayerListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent e)
 	{
 		Account seller = new Account(e.getPlayer().getName());
+		Account etat = new Account(this.plugin.getConfig().get("Compte-Etat").toString());
 
 		if(e.hasBlock())
 		{
@@ -81,8 +82,21 @@ public class AdminShopPlayerListener implements Listener {
 									e.getPlayer().getInventory().removeItem(new ItemStack[] { is });
 									e.getPlayer().updateInventory();
 
-									p.sendMessage(ChatColor.GREEN + "Vous avez vendu " + shop.getTailleLots() + " " + ChatColor.AQUA + shop.getBloc().name() + ChatColor.GREEN + " pour " + shop.getPrix() + " $ !");
+									p.sendMessage(ChatColor.GREEN + "Vous avez vendu " + shop.getTailleLots() + " " + ChatColor.AQUA + shop.getBloc().name() + ChatColor.GREEN + " pour " + shop.getPrix() + " " + this.plugin.getConfig().get("Monnaie").toString() + " !");
 									seller.getHoldings().add(shop.getPrix());
+									
+									if(this.plugin.getConfig().getBoolean("Retrait-Etat") == true)
+									{
+										if(etat != null)
+										{
+											etat.getHoldings().subtract(shop.getPrix());
+										}
+									}
+									
+									else
+									{
+										return;
+									}
 								}
 
 								else

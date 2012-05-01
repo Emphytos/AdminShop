@@ -81,7 +81,7 @@ public class AdminShopBlockListener implements Listener {
 					e.setLine(0, ChatColor.AQUA + "AdminShop");
 					e.setLine(1, ChatColor.GREEN + "lot de : " + shop.getTailleLots());
 
-					e.setLine(3, ChatColor.GREEN + "" + shop.getPrix() + ChatColor.AQUA + " $/lot");
+					e.setLine(3, ChatColor.GREEN + "" + shop.getPrix() + ChatColor.AQUA + " " + this.plugin.getConfig().get("Monnaie").toString());
 				}
 			}
 			
